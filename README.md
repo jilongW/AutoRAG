@@ -81,6 +81,9 @@ We recommend using Python version 3.9 or higher for AutoRAG.
 
 ```bash
 pip install AutoRAG
+git clone https://github.com/vllm-project/vllm.git
+pip install -r requirements-build.txt --extra-index-url https://download.pytorch.org/whl/cpu
+PIP_PRE=1 PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu https://storage.openvinotoolkit.org/simple/wheels/nightly/" VLLM_TARGET_DEVICE=openvino python -m pip install -v .
 ```
 
 # ⚡ QuickStart
