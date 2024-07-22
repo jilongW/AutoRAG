@@ -31,12 +31,12 @@ def vllm(prompts: List[str], llm: str, **kwargs) -> Tuple[List[str], List[List[i
         raise ImportError("Please install vllm library. You can install it by running `pip install vllm`.")
 
     input_kwargs = deepcopy(kwargs)
-    vllm_model = make_vllm_instance(llm, input_kwargs)
+    vllm_model = LLM(model=llm, trust_remote_code=True)
 
     if 'logprobs' not in input_kwargs:
         input_kwargs['logprobs'] = 1
 
-    generate_params = SamplingParams(**input_kwargs)
+    generate_params = SamplingParams(temperature=input_kwargs['temperature'],logprobs=input_kwargs['logprobs']) 
     results: List[RequestOutput] = vllm_model.generate(prompts, generate_params)
     generated_texts = list(map(lambda x: x.outputs[0].text, results))
     generated_token_ids = list(map(lambda x: x.outputs[0].token_ids, results))
