@@ -36,6 +36,8 @@ def run_generator_node(modules: List[Callable],
     if not os.path.exists(node_dir):
         os.makedirs(node_dir)
     qa_data = pd.read_parquet(os.path.join(project_dir, "data", "qa.parquet"), engine='pyarrow')
+    qa_data = qa_data.head(10)
+    #print(qa_data)
     if 'generation_gt' not in qa_data.columns:
         raise ValueError("You must have 'generation_gt' column in qa.parquet.")
     generation_gt = list(map(lambda x: x.tolist(), qa_data['generation_gt'].tolist()))
@@ -51,14 +53,15 @@ def run_generator_node(modules: List[Callable],
     metric_names, metric_params = cast_metrics(strategies.get('metrics'))
     if metric_names is None or len(metric_names) <= 0:
         raise ValueError("You must at least one metrics for generator evaluation.")
+    #print("=======================0=======================")
     results = list(
         map(lambda result: evaluate_generator_node(result, generation_gt, strategies.get('metrics')), results))
-
+    #print(f"results: {results}")
     # save results to folder
     filepaths = list(map(lambda x: os.path.join(node_dir, f'{x}.parquet'), range(len(modules))))
     list(map(lambda x: x[0].to_parquet(x[1], index=False), zip(results, filepaths)))  # execute save to parquet
     filenames = list(map(lambda x: os.path.basename(x), filepaths))
-
+    #print(f"filenames: {filenames}")
     summary_df = pd.DataFrame({
         'filename': filenames,
         'module_name': list(map(lambda module: module.__name__, modules)),
@@ -67,7 +70,7 @@ def run_generator_node(modules: List[Callable],
         'average_output_token': token_usages,
         **{metric: list(map(lambda x: x[metric].mean(), results)) for metric in metric_names}
     })
-
+    #print(f"summary_df: {summary_df}")
     # filter by strategies
     if strategies.get('speed_threshold') is not None:
         results, filenames = filter_by_threshold(results, average_times, strategies['speed_threshold'], filenames)
