@@ -22,5 +22,5 @@ node_lines:
         metrics: [ meteor, rouge, bert_score ]
       modules:
         - module_type: vllm
-          llm: openbmb/MiniCPM-2B-sft-bf16
+          llm: allenai/OLMo-1B-hf
           temperature: [ 0.1, 0.5, 1.0 ]
