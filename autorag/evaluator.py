@@ -57,7 +57,9 @@ class Evaluator:
         if not corpus_data_path.endswith('.parquet'):
             raise ValueError(f"Corpus data path {corpus_data_path} is not a parquet file.")
         self.qa_data = pd.read_parquet(qa_data_path, engine='pyarrow')
+        self.qa_data = self.qa_data.head(10)
         self.corpus_data = pd.read_parquet(corpus_data_path, engine='pyarrow')
+        #self.corpus_data = self.corpus_data.head(10)
         self.qa_data = cast_qa_dataset(self.qa_data)
         self.corpus_data = cast_corpus_dataset(self.corpus_data)
         self.project_dir = project_dir if project_dir is not None else os.getcwd()
@@ -85,20 +87,27 @@ class Evaluator:
         # copy yaml file to trial directory
         shutil.copy(yaml_path, os.path.join(self.project_dir, trial_name, 'config.yaml'))
         node_lines = self._load_node_lines(yaml_path)
+        #print("====================node_lines================")
+        #print(node_lines)
         self.__embed(node_lines)
 
         trial_summary_df = pd.DataFrame(columns=['node_line_name', 'node_type', 'best_module_filename',
                                                  'best_module_name', 'best_module_params', 'best_execution_time'])
+        #print("========trial_summary_df==========")
+        #print(trial_summary_df)
         for i, (node_line_name, node_line) in enumerate(node_lines.items()):
             node_line_dir = os.path.join(self.project_dir, trial_name, node_line_name)
             os.makedirs(node_line_dir, exist_ok=False)
             if i == 0:
                 previous_result = self.qa_data
+                
             logger.info(f'Running node line {node_line_name}...')
+            #print(previous_result)
             previous_result = run_node_line(node_line, node_line_dir, previous_result)
 
             trial_summary_df = self._append_node_line_summary(node_line_name, node_line_dir, trial_summary_df)
-
+            #print("================trial_summary_df===========")
+            #print(trial_summary_df)
         trial_summary_df.to_csv(os.path.join(self.project_dir, trial_name, 'summary.csv'), index=False)
 
     def __embed(self, node_lines: Dict[str, List[Node]]):
@@ -107,6 +116,7 @@ class Evaluator:
             logger.info('Embedding BM25 corpus...')
             bm25_tokenizer_list = list(chain.from_iterable(
                 map(lambda nodes: extract_values_from_nodes(nodes, 'bm25_tokenizer'), node_lines.values())))
+            #print(bm25_tokenizer_list)
             if len(bm25_tokenizer_list) == 0:
                 bm25_tokenizer_list = ['porter_stemmer']
             for bm25_tokenizer in bm25_tokenizer_list:
@@ -124,6 +134,8 @@ class Evaluator:
             # get embedding batch size in nodes
             embedding_batch_list = list(chain.from_iterable(
                 map(lambda nodes: extract_values_from_nodes(nodes, 'embedding_batch'), node_lines.values())))
+            #print("===========embedding_batch_list=================")
+            #print(embedding_batch_list)
             if len(embedding_batch_list) == 0:
                 embedding_batch = 100
             else:
