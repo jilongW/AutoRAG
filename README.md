@@ -90,6 +90,12 @@ PIP_PRE=1 PIP_EXTRA_INDEX_URL="https://download.pytorch.org/whl/cpu https://stor
 
 ### 1. Prepare your evaluation data
 
+- I use
+```python
+python ./sample_dataset/triviaqa/load_triviaqa_dataset.py
+```
+
+
 For evaluation, you need to prepare just three files.
 
 1. **QA** dataset file (qa.parquet)
@@ -104,7 +110,14 @@ There is a template for your evaluation data for using AutoRAG.
   at [here](https://docs.auto-rag.com/data_creation/data_format.html).
 - Plus, you can get example datasets for testing AutoRAG at [here](./sample_dataset).
 
+
+
 ### 2. Evaluate your data to various RAG modules
+
+- I use
+```python
+autorag evaluate --config ./sample_config/simple_local.yaml  --qa_data_path ./data/qa.parquet --corpus_data_path ./data/corpus.parquet
+```
 
 You can get various config yaml files at [here](./sample_config).
 We highly recommend using pre-made config yaml files for starter.
