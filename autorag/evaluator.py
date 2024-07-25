@@ -57,7 +57,7 @@ class Evaluator:
         if not corpus_data_path.endswith('.parquet'):
             raise ValueError(f"Corpus data path {corpus_data_path} is not a parquet file.")
         self.qa_data = pd.read_parquet(qa_data_path, engine='pyarrow')
-        self.qa_data = self.qa_data.head(10)
+        #self.qa_data = self.qa_data.head(10)
         self.corpus_data = pd.read_parquet(corpus_data_path, engine='pyarrow')
         #self.corpus_data = self.corpus_data.head(10)
         self.qa_data = cast_qa_dataset(self.qa_data)
